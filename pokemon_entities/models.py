@@ -7,4 +7,4 @@ class Pokemon(models.Model):
     created_date = models.DateTimeField()
 
     def __str__(self):
-        return f'{self.description} {self.title} {self.created_date}'
+        return f'{self.title}'
