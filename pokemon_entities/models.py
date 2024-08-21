@@ -30,6 +30,8 @@ class PokemonEntity(models.Model):
     lon = models.FloatField(
         help_text='Долгота местоположения покемона.'
     )
+    appeared_at = models.DateTimeField()
+    disappeared_at = models.DateTimeField()
 
     def __str__(self):
         return f'{self.pokemon.title} на ({self.lat}, {self.lon})'
