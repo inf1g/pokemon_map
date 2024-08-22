@@ -7,12 +7,13 @@ class Pokemon(models.Model):
         default='покемон',
         help_text='Название покемона.'
     )
-    photo = models.ImageField(
+    image = models.ImageField(
         upload_to='Pokemon',
         help_text='Картинка покемона',
         null=True,
         blank=True
     )
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return f'{self.title}'
@@ -36,4 +37,5 @@ class PokemonEntity(models.Model):
     stamina = models.IntegerField(help_text='Выносливость', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.pokemon.title} на ({self.lat}, {self.lon})'
+        return f'{self.pokemon} на ({self.lat}, {self.lon})'
+
