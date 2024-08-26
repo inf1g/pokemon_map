@@ -58,20 +58,29 @@ def show_pokemon(request, pokemon_id):
     requested_pokemon = get_object_or_404(Pokemon, id=int(pokemon_id))
     image_url = request.build_absolute_uri(requested_pokemon.image.url)
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    pokemon_dict = {
+        "title_ru": requested_pokemon.title_ru,
+        "title_en": requested_pokemon.title_en,
+        "title_jp": requested_pokemon.title_jp,
+        "description": requested_pokemon.description,
+        "img_url": image_url,
+        "previous_evolution": None
+    }
     for entity in PokemonEntity.objects.filter(pokemon=requested_pokemon):
         add_pokemon(
             folium_map, entity.lat,
             entity.lon,
             image_url
         )
-        pokemon_dict = {
-            "title_ru": entity.pokemon.title_ru,
-            "title_en": entity.pokemon.title_en,
-            "title_jp": entity.pokemon.title_jp,
-            "description": entity.pokemon.description,
-            "img_url": image_url
-        }
+        if entity.pokemon.evolves_from:
+            previous_evolution = {
+                "title_ru": entity.pokemon.evolves_from.title_ru,
+                "pokemon_id": entity.pokemon.evolves_from.id,
+                "img_url": request.build_absolute_uri(entity.pokemon.evolves_from.image.url)
+            }
+            pokemon_dict['previous_evolution'] = previous_evolution
 
+    print(pokemon_dict)
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(), 'pokemon': pokemon_dict
     })

@@ -24,6 +24,12 @@ class Pokemon(models.Model):
         null=True,
         blank=True
     )
+    evolves_from = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        related_name='evolution_from'
+    )
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -46,7 +52,7 @@ class PokemonEntity(models.Model):
     attack = models.IntegerField(help_text='Атака', null=True, blank=True)
     defense = models.IntegerField(help_text='Защита', null=True, blank=True)
     stamina = models.IntegerField(help_text='Выносливость', null=True, blank=True)
+    previous_evolution = models
 
     def __str__(self):
         return f'{self.pokemon} на ({self.lat}, {self.lon})'
-
