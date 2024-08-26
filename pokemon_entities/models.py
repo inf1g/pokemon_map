@@ -2,11 +2,22 @@ from django.db import models  # noqa F401
 
 
 class Pokemon(models.Model):
-    title = models.CharField(
+    title_ru = models.CharField(
         max_length=200,
         default='покемон',
-        help_text='Название покемона.'
+        help_text='Название покемона на русском.'
     )
+    title_en = models.CharField(
+        max_length=200,
+        default='покемон',
+        help_text='Название покемона на английском.'
+    )
+    title_jp = models.CharField(
+        max_length=200,
+        default='покемон',
+        help_text='Название покемона на японском.'
+    )
+
     image = models.ImageField(
         upload_to='Pokemon',
         help_text='Картинка покемона',
@@ -16,7 +27,7 @@ class Pokemon(models.Model):
     description = models.TextField(blank=True)
 
     def __str__(self):
-        return f'{self.title}'
+        return f'{self.title_ru}'
 
 
 class PokemonEntity(models.Model):
