@@ -28,7 +28,7 @@ class Pokemon(models.Model):
         'self',
         on_delete=models.SET_NULL,
         blank=True, null=True,
-        related_name='evolution_from'
+        related_name='evolution'
     )
     description = models.TextField(blank=True)
 
