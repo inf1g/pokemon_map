@@ -56,7 +56,10 @@ def show_all_pokemons(request):
 
 def show_pokemon(request, pokemon_id):
     requested_pokemon = get_object_or_404(Pokemon, id=int(pokemon_id))
-    image_url = request.build_absolute_uri(requested_pokemon.image.url)
+    image_url = (
+        request.build_absolute_uri(requested_pokemon.image.url)
+        if requested_pokemon.image else DEFAULT_IMAGE_URL
+    )
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     pokemon_dict = {
         "title_ru": requested_pokemon.title_ru,
@@ -66,20 +69,39 @@ def show_pokemon(request, pokemon_id):
         "img_url": image_url,
         "previous_evolution": None
     }
+
     for entity in PokemonEntity.objects.filter(pokemon=requested_pokemon):
         add_pokemon(
-            folium_map, entity.lat,
+            folium_map,
+            entity.lat,
             entity.lon,
             image_url
         )
-        if entity.pokemon.evolves_from:
+
+        if requested_pokemon.evolves:
             previous_evolution = {
-                "title_ru": entity.pokemon.evolves_from.title_ru,
-                "pokemon_id": entity.pokemon.evolves_from.id,
-                "img_url": request.build_absolute_uri(entity.pokemon.evolves_from.image.url)
+                "title_ru": requested_pokemon.evolves.title_ru,
+                "pokemon_id": requested_pokemon.evolves.id,
+                "img_url": (
+                    request.build_absolute_uri(requested_pokemon.evolves.image.url)
+                    if requested_pokemon.evolves.image else DEFAULT_IMAGE_URL
+                )
             }
             pokemon_dict['previous_evolution'] = previous_evolution
 
+        next_evolution = requested_pokemon.evolution.first()
+        if next_evolution:
+            next_evolution_dict = {
+                "title_ru": next_evolution.title_ru,
+                "pokemon_id": next_evolution.id,
+                "img_url": (
+                    request.build_absolute_uri(next_evolution.image.url)
+                    if next_evolution.image else DEFAULT_IMAGE_URL
+                )
+            }
+            pokemon_dict['next_evolution'] = next_evolution_dict
+
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon_dict
+        'map': folium_map._repr_html_(),
+        'pokemon': pokemon_dict
     })
