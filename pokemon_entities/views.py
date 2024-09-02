@@ -35,9 +35,10 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    time_now = timezone.localtime()
     for pokemon_entity in PokemonEntity.objects.filter(
-            appeared_at__lte=timezone.localtime(),
-            disappeared_at__gte=timezone.localtime()
+            appeared_at__lte=time_now,
+            disappeared_at__gte=time_now
     ):
         pokemon_image = check_image(request, pokemon_entity.pokemon.image)
         add_pokemon(
@@ -66,13 +67,14 @@ def show_pokemon(request, pokemon_id):
     requested_pokemon = get_object_or_404(Pokemon, id=int(pokemon_id))
     image_url = check_image(request, requested_pokemon.image)
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    pokemon_dict = {
+    pokemon_info = {
         "title_ru": requested_pokemon.title_ru,
         "title_en": requested_pokemon.title_en,
         "title_jp": requested_pokemon.title_jp,
         "description": requested_pokemon.description,
         "img_url": image_url,
-        "previous_evolution": None
+        "previous_evolution": None,
+        "next_evolution": None
     }
 
     for entity in PokemonEntity.objects.filter(pokemon=requested_pokemon):
@@ -83,26 +85,26 @@ def show_pokemon(request, pokemon_id):
             image_url
         )
 
-        if requested_pokemon.evolves:
-            image_url = check_image(request, requested_pokemon.evolves.image)
-            previous_evolution = {
-                "title_ru": requested_pokemon.evolves.title_ru,
-                "pokemon_id": requested_pokemon.evolves.id,
-                "img_url": image_url
-            }
-            pokemon_dict['previous_evolution'] = previous_evolution
+    if requested_pokemon.previous_evolution:
+        prev_image_url = check_image(request, requested_pokemon.previous_evolution.image)
+        previous_evolution = {
+            "title_ru": requested_pokemon.previous_evolution.title_ru,
+            "pokemon_id": requested_pokemon.previous_evolution.id,
+            "img_url": prev_image_url
+        }
+        pokemon_info['previous_evolution'] = previous_evolution
 
-        next_evolution = requested_pokemon.evolution.first()
-        if next_evolution:
-            image_url = check_image(request, next_evolution.image)
-            next_evolution_dict = {
-                "title_ru": next_evolution.title_ru,
-                "pokemon_id": next_evolution.id,
-                "img_url": image_url
-            }
-            pokemon_dict['next_evolution'] = next_evolution_dict
+    next_evolution = requested_pokemon.next_evolutions.first()
+    if next_evolution:
+        next_image_url = check_image(request, next_evolution.image)
+        next_evolution_info = {
+            "title_ru": next_evolution.title_ru,
+            "pokemon_id": next_evolution.id,
+            "img_url": next_image_url
+        }
+        pokemon_info['next_evolution'] = next_evolution_info
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
-        'pokemon': pokemon_dict
+        'pokemon': pokemon_info
     })

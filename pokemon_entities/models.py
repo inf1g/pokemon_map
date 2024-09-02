@@ -28,16 +28,20 @@ class Pokemon(models.Model):
         null=True,
         blank=True
     )
-    evolves = models.ForeignKey(
+    previous_evolution = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
         blank=True, null=True,
-        related_name='evolution'
+        verbose_name='эволюции для покемона',
+        related_name='next_evolutions'
     )
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True,
+        verbose_name='описание покемона'
+    )
 
     def __str__(self):
-        return f'{self.title_ru}'
+        return self.title_ru
 
 
 class PokemonEntity(models.Model):
